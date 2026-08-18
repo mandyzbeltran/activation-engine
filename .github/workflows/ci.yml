@@ -5,7 +5,20 @@ on:
   pull_request:
 
 jobs:
+  privacy:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+      - name: Verify public repository privacy boundary
+        run: python scripts/privacy_gate.py --all-history
+
   test:
+    needs: privacy
     strategy:
       matrix:
         os: [ubuntu-24.04, macos-14]

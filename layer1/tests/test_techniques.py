@@ -4,6 +4,7 @@ from copy import deepcopy
 from datetime import timedelta
 
 from layer1.aggregate.drivers import _merge_multipass
+from layer1.api import _collect_retrograde_passes
 from layer1.ephemeris.common import parse_utc
 from layer1.ephemeris.natal import compute_natal_chart
 from layer1.ephemeris.profection import compute_profection_events
@@ -76,6 +77,23 @@ def test_multipass_requires_a_real_direct_retrograde_direct_sequence() -> None:
         "retrograde",
         "direct-2",
     ]
+
+
+def test_activation_passes_keep_planet_and_aspect_identity() -> None:
+    start = parse_utc("2026-01-01T00:00:00Z")
+    events = [
+        _pass_event(start, retrograde=False),
+        _pass_event(start + timedelta(days=60), retrograde=True),
+        _pass_event(start + timedelta(days=120), retrograde=False),
+    ]
+    _merge_multipass(events)
+
+    passes = _collect_retrograde_passes(events)
+
+    assert len(passes) == 3
+    assert all(item["transiting_body"] == "saturn" for item in passes)
+    assert all(item["aspect"] == "square" for item in passes)
+    assert all(item["natal_target"] == "moon" for item in passes)
 
 
 def test_planetary_return_is_not_filtered_from_transits() -> None:

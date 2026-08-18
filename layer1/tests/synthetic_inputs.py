@@ -28,3 +28,12 @@ SYNTHETIC_INPUT = {
         "node_type": "true",
     },
 }
+
+SYNTHETIC_CIVIL_BIRTH = {
+    "local_date": "2000-01-01",
+    "local_time": "12:00:00",
+    "time_known": True,
+    "latitude": 0.0,
+    "longitude": 0.0,
+    "tz_iana": "Etc/UTC",
+}
