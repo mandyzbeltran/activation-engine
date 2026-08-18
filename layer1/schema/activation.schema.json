@@ -1,0 +1,176 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.invalid/astro-layer1/activation.schema.json",
+  "title": "Layer 1 Activation",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "activation_id", "config_version", "provenance", "zodiac_system",
+    "house_system", "mode", "primary_life_area", "life_area_scores",
+    "time_scale", "window", "polarity", "polarity_mix", "intensity",
+    "confidence", "birth_data_precision", "house_precision", "techniques",
+    "headline", "one_line", "drivers", "kb_context_ids", "narrative_hints",
+    "degraded_flags"
+  ],
+  "properties": {
+    "activation_id": {"type": "string", "pattern": "^[0-9a-f]{16}$"},
+    "config_version": {"type": "string", "pattern": "^layer1@[0-9]{4}\\.[0-9]{2}\\.[0-9]{2}(\\.[0-9]+)?$"},
+    "provenance": {"$ref": "#/$defs/provenance"},
+    "zodiac_system": {"const": "tropical"},
+    "house_system": {"enum": ["placidus", "whole_sign"]},
+    "mode": {"enum": ["forecast", "retrospective"]},
+    "primary_life_area": {"enum": ["career", "wealth", "relationships", "family"]},
+    "life_area_scores": {
+      "type": "object",
+      "minProperties": 1,
+      "maxProperties": 4,
+      "additionalProperties": false,
+      "properties": {
+        "career": {"$ref": "#/$defs/unitNumber"},
+        "wealth": {"$ref": "#/$defs/unitNumber"},
+        "relationships": {"$ref": "#/$defs/unitNumber"},
+        "family": {"$ref": "#/$defs/unitNumber"}
+      }
+    },
+    "time_scale": {"enum": ["days", "weeks", "months", "year", "multi_year"]},
+    "window": {"$ref": "#/$defs/window"},
+    "polarity": {"enum": ["supportive", "challenging", "neutral", "growth"]},
+    "polarity_mix": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["supportive", "challenging", "neutral", "growth"],
+      "properties": {
+        "supportive": {"$ref": "#/$defs/unitNumber"},
+        "challenging": {"$ref": "#/$defs/unitNumber"},
+        "neutral": {"$ref": "#/$defs/unitNumber"},
+        "growth": {"$ref": "#/$defs/unitNumber"}
+      }
+    },
+    "intensity": {"$ref": "#/$defs/unitNumber"},
+    "confidence": {"$ref": "#/$defs/unitNumber"},
+    "birth_data_precision": {"enum": ["known", "hour_only", "day_only", "placeholder"]},
+    "house_precision": {"enum": ["placidus", "whole_sign_fallback", "no_houses"]},
+    "techniques": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {"enum": ["foundation", "natal", "transit", "progression", "solar_return", "lunar_return", "profection"]}
+    },
+    "headline": {"$ref": "#/$defs/localizedText"},
+    "one_line": {"$ref": "#/$defs/localizedText"},
+    "drivers": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 8,
+      "items": {"$ref": "#/$defs/driver"}
+    },
+    "kb_context_ids": {"type": "array", "uniqueItems": true, "items": {"type": "string", "minLength": 1}},
+    "narrative_hints": {"$ref": "#/$defs/narrativeHints"},
+    "degraded_flags": {"type": "array", "uniqueItems": true, "items": {"type": "string", "minLength": 1}}
+  },
+  "$defs": {
+    "unitNumber": {"type": "number", "minimum": 0, "maximum": 1},
+    "utcTimestamp": {"type": "string", "format": "date-time", "pattern": "Z$"},
+    "provenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["se_version", "se_ephe_files_sha256", "deltat_source", "tzdb_version", "immanuel_version"],
+      "properties": {
+        "se_version": {"type": "string", "minLength": 1},
+        "se_ephe_files_sha256": {"type": "string", "minLength": 1},
+        "deltat_source": {"type": "string", "minLength": 1},
+        "tzdb_version": {"type": "string", "minLength": 1},
+        "immanuel_version": {"type": "string", "minLength": 1}
+      }
+    },
+    "retrogradePass": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["peak_utc", "phase", "orb_factor_at_peak"],
+      "properties": {
+        "peak_utc": {"$ref": "#/$defs/utcTimestamp"},
+        "phase": {"enum": ["direct-1", "retrograde", "direct-2"]},
+        "orb_factor_at_peak": {"$ref": "#/$defs/unitNumber"}
+      }
+    },
+    "window": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["start_utc", "end_utc", "peak_utc", "peak_precision_hours", "retrograde_passes"],
+      "properties": {
+        "start_utc": {"$ref": "#/$defs/utcTimestamp"},
+        "end_utc": {"$ref": "#/$defs/utcTimestamp"},
+        "peak_utc": {"$ref": "#/$defs/utcTimestamp"},
+        "peak_precision_hours": {"type": "integer", "minimum": 1},
+        "retrograde_passes": {"type": "array", "items": {"$ref": "#/$defs/retrogradePass"}}
+      }
+    },
+    "localizedText": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["locale", "text"],
+      "properties": {
+        "locale": {"enum": ["zh-Hans", "en"]},
+        "text": {"type": "string", "minLength": 1}
+      }
+    },
+    "ephemerisSnapshot": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["transiting_lon_deg", "transiting_speed_deg_per_day", "natal_target_lon_deg", "angular_distance_deg", "retrograde"],
+      "properties": {
+        "transiting_lon_deg": {"type": "number", "minimum": 0, "exclusiveMaximum": 360},
+        "transiting_speed_deg_per_day": {"type": "number"},
+        "natal_target_lon_deg": {"type": "number", "minimum": 0, "exclusiveMaximum": 360},
+        "angular_distance_deg": {"type": "number", "minimum": 0, "maximum": 180},
+        "retrograde": {"type": "boolean"}
+      }
+    },
+    "driver": {
+      "type": "object",
+      "required": ["driver_id", "kind", "technique", "weight", "kb_lookup_id"],
+      "properties": {
+        "driver_id": {"type": "string", "minLength": 1},
+        "kind": {"enum": ["transit_to_natal", "transit_through_house", "profection", "progressed_moon_house", "progressed_moon_sign", "progressed_sun_sign_change", "solar_return_asc", "solar_return_asc_ruler_house", "solar_return_moon_house", "solar_return_stellium_house", "lunar_return_moon_house", "foundation"]},
+        "technique": {"enum": ["foundation", "natal", "transit", "progression", "solar_return", "lunar_return", "profection"]},
+        "transiting_body": {"$ref": "#/$defs/planet"},
+        "transiting_sign": {"$ref": "#/$defs/sign"},
+        "transiting_house": {"$ref": "#/$defs/house"},
+        "aspect": {"enum": ["conjunction", "opposition", "square", "trine", "sextile"]},
+        "natal_target": {"type": ["string", "null"], "enum": ["sun", "moon", "mercury", "venus", "mars", "jupiter", "saturn", "uranus", "neptune", "pluto", "asc", "mc", "ic", "dsc", null]},
+        "target_type": {"enum": ["planet", "angle", "house"]},
+        "house": {"$ref": "#/$defs/house"},
+        "sign": {"anyOf": [{"$ref": "#/$defs/sign"}, {"type": "null"}]},
+        "orb_deg": {"type": "number", "minimum": 0},
+        "phase": {"enum": ["applying", "exact", "separating"]},
+        "transiting_retrograde": {"type": "boolean"},
+        "stationary": {"type": "boolean"},
+        "weight": {"$ref": "#/$defs/unitNumber"},
+        "kb_lookup_id": {"type": "string", "minLength": 1},
+        "keywords": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "string", "minLength": 1}},
+        "ephemeris_snapshot": {"anyOf": [{"$ref": "#/$defs/ephemerisSnapshot"}, {"type": "null"}]},
+        "profection_house": {"$ref": "#/$defs/house"},
+        "profection_lord_traditional": {"$ref": "#/$defs/planet"},
+        "profection_lord_modern": {"$ref": "#/$defs/planet"},
+        "profection_lord_active": {"$ref": "#/$defs/planet"}
+      }
+    },
+    "narrativeHints": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["tone", "avoid", "encourage"],
+      "properties": {
+        "tone": {"enum": ["grounded", "descriptive", "actionable", "cautious"]},
+        "time_stance": {"enum": ["reviewing", "encountering", "integrating"]},
+        "avoid": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "string", "minLength": 1}},
+        "encourage": {"type": "array", "uniqueItems": true, "items": {"type": "string", "minLength": 1}},
+        "trigger_chain": {"type": "boolean"},
+        "why_high_intensity": {"enum": ["profection_year_lord_hit", "multiple_outer_transits", "stationary_body", "return_year_amplifier", "saturn_return", "eclipse_reinforcement"]},
+        "truncated_driver_count": {"type": "integer", "minimum": 1}
+      }
+    },
+    "planet": {"enum": ["sun", "moon", "mercury", "venus", "mars", "jupiter", "saturn", "uranus", "neptune", "pluto"]},
+    "sign": {"enum": ["aries", "taurus", "gemini", "cancer", "leo", "virgo", "libra", "scorpio", "sagittarius", "capricorn", "aquarius", "pisces"]},
+    "house": {"type": "integer", "minimum": 1, "maximum": 12}
+  }
+}

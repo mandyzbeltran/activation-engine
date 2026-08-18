@@ -1,0 +1,14 @@
+{
+  "systems": ["western", "vedic"],
+  "techniques": ["foundation", "natal", "transit", "progression", "solar_return", "lunar_return", "profection"],
+  "planets": ["sun", "moon", "mercury", "venus", "mars", "jupiter", "saturn", "uranus", "neptune", "pluto"],
+  "signs": ["aries", "taurus", "gemini", "cancer", "leo", "virgo", "libra", "scorpio", "sagittarius", "capricorn", "aquarius", "pisces"],
+  "aspects": ["conjunction", "opposition", "square", "trine", "sextile"],
+  "houses": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+  "angles": ["asc", "mc", "ic", "dsc"],
+  "life_areas": ["career", "wealth", "relationships", "family", "health", "self", "spirituality", "community"],
+  "time_scales": ["days", "weeks", "months", "year", "multi_year"],
+  "polarities": ["supportive", "challenging", "neutral", "growth"],
+  "intensities": ["low", "medium", "high"],
+  "target_types": ["planet", "angle", "house"]
+}

@@ -1,0 +1,14 @@
+.DS_Store
+.pytest_cache/
+.venv/
+*.egg-info/
+__pycache__/
+*.py[cod]
+dist/
+build/
+
+# Private-repository artifacts must never enter this public repository.
+docs/handoff-notes.md
+layer1/schema/life-area-mapping.yaml
+layer1/schema/polarity-map.json
+layer1/tests/fixtures.py
