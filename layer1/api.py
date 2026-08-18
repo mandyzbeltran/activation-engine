@@ -132,10 +132,7 @@ def _activation_from_bucket(bucket: List[dict], natal: dict, input: ComputeInput
     start = min(driver["start"] for driver in bucket)
     end = max(driver["end"] for driver in bucket)
     peak_driver = max(bucket, key=lambda item: (item["weight"], -int(item["peak"].timestamp())))
-    passes = []
-    for driver in bucket:
-        passes.extend(driver.get("retrograde_passes", []))
-    passes = sorted({(item["peak_utc"], item["phase"]): item for item in passes}.values(), key=lambda item: item["peak_utc"])
+    passes = _collect_retrograde_passes(bucket)
     headline, one_line = localized_text(primary, input["locale"])
     techniques = [name for name in TECHNIQUES if any(driver["technique"] == name for driver in bucket)]
     activation = {
@@ -170,6 +167,27 @@ def _activation_from_bucket(bucket: List[dict], natal: dict, input: ComputeInput
     }
     activation["activation_id"] = activation_hash(activation, input["config"], bucket)
     return activation
+
+
+def _collect_retrograde_passes(drivers: List[dict]) -> List[dict]:
+    """Attach the transit identity that the pass-only source records omit."""
+    passes = {}
+    for driver in drivers:
+        for item in driver.get("retrograde_passes", []):
+            enriched = {
+                **item,
+                "transiting_body": driver["transiting_body"],
+                "aspect": driver["aspect"],
+                "natal_target": driver["natal_target"],
+            }
+            key = (
+                enriched["peak_utc"], enriched["phase"],
+                enriched["transiting_body"], enriched["aspect"], enriched["natal_target"],
+            )
+            passes[key] = enriched
+    return sorted(passes.values(), key=lambda item: (
+        item["peak_utc"], item["transiting_body"], item["aspect"], item["natal_target"], item["phase"],
+    ))
 
 
 def _context_ids(area: str, drivers: List[dict]) -> List[str]:

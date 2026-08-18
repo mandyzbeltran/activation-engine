@@ -1,7 +1,14 @@
 .DS_Store
+.agents/
+.codex/
+.env
+.env.*
 .pytest_cache/
 .venv/
 *.egg-info/
+*.db
+*.log
+*.sqlite*
 __pycache__/
 *.py[cod]
 dist/

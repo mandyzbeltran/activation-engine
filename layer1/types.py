@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Dict, List, Optional, TypedDict, Union
+from typing import Dict, List, NotRequired, Optional, TypedDict, Union
 
 JsonScalar = Union[str, int, float, bool, None]
 
@@ -54,6 +54,9 @@ class RetrogradePass(TypedDict):
     peak_utc: str
     phase: str
     orb_factor_at_peak: float
+    transiting_body: NotRequired[str]
+    aspect: NotRequired[str]
+    natal_target: NotRequired[str]
 
 
 class ActivationWindow(TypedDict):
