@@ -9,12 +9,13 @@ from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel, Field, model_validator
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from .api import compute_activations
 from .config import CONFIG_VERSION
 from .ephemeris.common import iso_z
 from .ephemeris.natal import summarize_natal_chart
+from .ephemeris.vedic import summarize_vedic_natal_chart
 
 
 class BirthInput(BaseModel):
@@ -46,6 +47,16 @@ class ActivationsRequest(BaseModel):
 
 class NatalSummaryRequest(BaseModel):
     birth: BirthInput
+
+
+class VedicBirthInput(BirthInput):
+    model_config = ConfigDict(extra="forbid")
+
+
+class VedicNatalSummaryRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    birth: VedicBirthInput
 
 
 def normalized_birth(birth: BirthInput) -> dict:
@@ -121,6 +132,14 @@ def create_app() -> FastAPI:
     def natal_summary(request: NatalSummaryRequest):
         try:
             summary = summarize_natal_chart(normalized_birth(request.birth), default_config())
+        except ValueError as exc:
+            raise HTTPException(status_code=422, detail=str(exc)) from exc
+        return {"natal_summary": summary, "data_source": "swiss_ephemeris"}
+
+    @app.post("/v1/vedic/natal-summary")
+    def vedic_natal_summary(request: VedicNatalSummaryRequest):
+        try:
+            summary = summarize_vedic_natal_chart(normalized_birth(request.birth))
         except ValueError as exc:
             raise HTTPException(status_code=422, detail=str(exc)) from exc
         return {"natal_summary": summary, "data_source": "swiss_ephemeris"}
